@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic-Tac-Toe o'yini</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        font-family: 'Montserrat', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        color: #f0f0f0;
+        user-select: none;
+    }
+
+    h1 {
+        font-weight: 700;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(3, 120px);
+        grid-template-rows: repeat(3, 120px);
+        gap: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .cell {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 5rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        transition: background-color 0.3s ease, transform 0.15s ease;
+    }
+
+    .cell:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    .cell.x {
+        color: #ff4c60; /* jonli qizil rang */
+        text-shadow: 0 0 10px #ff4c60;
+    }
+
+    .cell.o {
+        color: #4cffb8; /* jonli yashilrang */
+        text-shadow: 0 0 10px #4cffb8;
+    }
+
+    #message {
+        margin-top: 30px;
+        font-size: 1.8rem;
+        font-weight: 600;
+        min-height: 2.5rem;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    #reset {
+        margin-top: 25px;
+        background: #ff4c60;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 40px;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(255, 76, 96, 0.5);
+        transition: background 0.3s ease;
+    }
+
+    #reset:hover {
+        background: #e04357;
+        box-shadow: 0 8px 30px rgba(224, 67, 87, 0.7);
+    }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+        .board {
+            grid-template-columns: repeat(3, 90px);
+            grid-template-rows: repeat(3, 90px);
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .cell {
+            font-size: 4rem;
+        }
+
+        #reset {
+            padding: 10px 30px;
+            font-size: 1.1rem;
+        }
+    }
+</style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe o'yini</h1>
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <div id="message"></div>
+    <button id="reset">Qaytadan boshlash</button>
+
+<script>
+    const board = document.getElementById('board');
+    const cells = document.querySelectorAll('.cell');
+    const message = document.getElementById('message');
+    const resetButton = document.getElementById('reset');
+
+    let turn = 'X';
+    let boardState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+
+    const winningConditions = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6]
+    ];
+
+    function handleCellClick(e) {
+        const index = e.target.getAttribute('data-index');
+
+        if (boardState[index] !== '' || !gameActive) {
+            return;
+        }
+
+        boardState[index] = turn;
+        e.target.textContent = turn;
+        e.target.classList.add(turn.toLowerCase());
+
+        if (checkWin()) {
+            message.textContent = `${turn} g'olib bo'ldi! 🎉`;
+            gameActive = false;
+            highlightWinningCells();
+            return;
+        }
+
+        if (boardState.every(cell => cell !== '')) {
+            message.textContent = 'Durrang! ⚔️';
+            gameActive = false;
+            return;
+        }
+
+        turn = turn === 'X' ? 'O' : 'X';
+        message.textContent = `${turn} navbati`;
+    }
+
+    function checkWin() {
+        return winningConditions.some(condition => {
+            return condition.every(index => boardState[index] === turn);
+        });
+    }
+
+    function highlightWinningCells() {
+        for (let condition of winningConditions) {
+            if (condition.every(index => boardState[index] === turn)) {
+                condition.forEach(index => {
+                    cells[index].style.boxShadow = `0 0 15px 5px ${turn === 'X' ? '#ff4c60' : '#4cffb8'}`;
+                    cells[index].style.borderRadius = '50%';
+                });
+            }
+        }
+    }
+
+    function resetGame() {
+        boardState = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        turn = 'X';
+        cells.forEach(cell => {
+            cell.textContent = '';
+            cell.classList.remove('x', 'o');
+            cell.style.boxShadow = 'none';
+            cell.style.borderRadius = '15px';
+        });
+        message.textContent = `${turn} navbati`;
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+    resetButton.addEventListener('click', resetGame);
+
+    message.textContent = `${turn} navbati`;
+</script>
+</body>
+</html>
